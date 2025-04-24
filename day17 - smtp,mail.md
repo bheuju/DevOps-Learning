@@ -2,7 +2,7 @@
 
 dpkg -query -s vim
 
-### package install
+### package install bash script
 
 ```bash
 #!/bin/bash
@@ -33,3 +33,4 @@ mailtrap email testing > inboxes > inbox integration > others ? postfix
 
 crontab -e
 `*/1 * * * * bash /home/bishal/scripts/logincount.sh`
+https://crontab.guru

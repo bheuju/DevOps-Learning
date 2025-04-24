@@ -4,7 +4,7 @@
 
 Add user to group
 
-```
+```bash
 whoami
 sudo usermod -aG docker <username>
 
@@ -81,7 +81,7 @@ sudo ls /var/lib/docker
 -------------------------------------------------------------------------------------------------------
 > buildkit  containers  engine-id  image  network  overlay2  plugins  runtimes  swarm  tmp  volumes
 -------------------------------------------------------------------------------------------------------
-# where are containers created
+# where containers are created
 sudo ls /var/lib/docker/containers
 
 ```
@@ -94,11 +94,11 @@ docker exec -it <container name/id> bash
 
 ## Setup following
 
-sonatype/nexus - https://hub.docker.com/r/sonatype/nexus
+sonatype/nexus3 - https://hub.docker.com/r/sonatype/nexus3
 jenkins - https://github.com/jenkinsci/docker
 gitlab - https://medium.com/@BuildWithLal/dockerized-gitlab-how-to-easily-set-up-your-own-gitlab-server-9a925be09c59
 
-```
+```bash
 docker pull sonatype/nexus
 
 

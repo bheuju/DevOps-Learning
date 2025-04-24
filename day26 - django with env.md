@@ -1,4 +1,4 @@
-Today we run django app using .env file to connect to database
+Today we run django app using `.env` file to connect to database
 
 ```ini
 # .env

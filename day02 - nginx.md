@@ -19,7 +19,10 @@ server {
 }
 ```
 
-Add to /drivers/etc/host
+Add to:
+
+- Windows: /drivers/etc/host
+- Linux: /etc/hosts
 
 ```
 192.168.22.100 dev.test
@@ -28,8 +31,11 @@ Add to /drivers/etc/host
 192.168.22.100 dev3.test
 ```
 
-`sudo nginx -t`
+```bash
+sudo nginx -t    # Check nginx config
+```
 
+List all files contents:
 `bishal@bishal:/etc/nginx/conf.d$ cat *`
 
 ```nginx

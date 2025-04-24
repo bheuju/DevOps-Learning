@@ -33,6 +33,7 @@ flush privileges;
 
 create database dbname;
 grant all privileges on *.* to bishal@'%';
+grant all privileges on <database>.* to bishal@'%';
 
 cat .mysql_history
 ```

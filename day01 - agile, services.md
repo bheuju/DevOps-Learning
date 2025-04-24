@@ -3,8 +3,6 @@
 - epic
 - story
 
-[x] Hello
-
 Agile Manifesto
 
 Linux Bootup process

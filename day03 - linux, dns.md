@@ -206,6 +206,8 @@ zone "devops.com" {
 };
 ```
 
+Reverse DNS
+
 ```
 zone "22.168.192.in-addr.arpa" {
         type master;
@@ -216,9 +218,63 @@ zone "22.168.192.in-addr.arpa" {
 ## From outside
 
 nslookup
+dig
 
 ### Self Study
 
 - reverse dns
 - pointer
 - bind
+
+```bash
+#### /etc/bind/named.conf.options ####
+options {
+   directory "/var/cache/bind";
+
+   // Allow queries from localhost and your local network
+   allow-query { any; };
+   allow-transfer { none; };
+
+   // Enable recursion for trusted clients
+   recursion yes;
+
+   // Forward DNS queries to external DNS servers
+   forwarders {
+       8.8.8.8;
+       8.8.4.4;
+   };
+
+   dnssec-validation no;
+   version "not disclosed";
+
+   // auth-nxdomain no;    # Disable authoritative NXDOMAIN responses
+   // listen-on-v6 { none; };
+   // listen-on { any; };
+};
+
+```
+
+````bash
+#### /etc/bind/named.conf.local ####
+zone "dev.me" {
+        type master;
+        file "/etc/bind/db.dev.me";
+};
+
+```bash
+#### /etc/bind/db.dev.me ####
+$TTL    604800
+@       IN      SOA     ns1.dev.me. admin.dev.me. (
+                             2024101001         ; Serial
+                             604800             ; Refresh
+                             86400              ; Retry
+                             2419200            ; Expire
+                             604800 )           ; Negative Cache TTL
+;
+@       IN      NS      ns1.dev.me.
+@       IN      A       192.168.22.97
+ns1     IN      A       192.168.22.97
+www     IN      A       192.168.22.97
+wp      IN      A       192.168.22.97
+*       IN      A       192.168.22.97
+````

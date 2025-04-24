@@ -1,3 +1,5 @@
+# Nginx configurations for gitlab, jenkins, nexus3
+
 ```nginx
 ➜  ~ sudo cat /etc/nginx/conf.d/gitlab.conf
 server {
