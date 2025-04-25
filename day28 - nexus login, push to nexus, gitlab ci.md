@@ -4,8 +4,9 @@ docker image list                             # list image
 docker push nexus.dev.me:8082/mariadb         #
 ```
 
-```
+```bash
 docker login -u admin -p redhat nexus.dev.me:8082
+docker push nexus.dev.me:8082/django:v1.0.0         # should give version, otherwise will use latest
 ```
 
 cat .bash_logout
