@@ -13,7 +13,7 @@
 - 192.168.22.84 kubemaster
 - 192.168.22.85 kubeworker
 
-## Set `kubernetes-master`
+## Set `kubernetes-master` and `kubernetes-worker`
 
 1. set hostname in `/etc/hosts`
    ```
@@ -92,21 +92,34 @@ https://kubesphere.io/
 
 ```bash
 sudo apt update -y
+sudo apt-get install -y kubectl kubeadm kubelet
+```
+
+# Master
+
+### Install containerd / dockerd ??
+
+```bash
 sudo apt -y install docker.io
 wget https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.17/cri-dockerd_0.3.17.3-0.ubuntu-jammy_amd64.deb
-apt-get install -y ./cri-dockerd_0.3.17.3-0.ubuntu-jammy_amd64.deb
-sudo apt-get install -y kubectl kubeadm kubelet
+sudo apt-get install -y ./cri-dockerd_0.3.17.3-0.ubuntu-jammy_amd64.deb
 ```
 
 ### Calico init
 
 ```bash
-kubeadm init --cri-socket=unix:///var/run/cri-dockerd.sock
+sudo kubeadm init --cri-socket=unix:///var/run/cri-dockerd.sock
 
 kubectl get pods -A
 -------------------------------
-kube-apiserver-kubeserver # this should be up
+kube-apiserver-kubeserver     # this should be up
 -------------------------------
+
+# from output of kubeadm init (run as a normal user)
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
 
 curl https://raw.githubusercontent.com/projectcalico/calico/v3.29.3/manifests/calico.yaml -O
 kubectl apply -f calico.yaml
@@ -115,12 +128,12 @@ kubectl apply -f calico.yaml
 # run it from normal user ... withot sudo
 
 kubectl get nodes
--------------------
-> control-plane
--------------------
+----------------------
+> control-plane Ready   # might take a while to get ready
+----------------------
 ```
 
-# Setup in worker
+# Worker
 
 ```
 set /etc/hosts
@@ -132,8 +145,21 @@ modprobe overlay
 modprobe
 ```
 
-everything except calico and init
+everything except calico and dockerd/containerd
+
+Summary:
+
+- set /etc/hosts
+- disable swap /etc/fstab
+- /etc/systemctl.conf
+- /etc/modules-load.d/k8s.conf
+- kubeadm, kubelet and kubectl installed
 
 add join from kubeadm init of master
 
-kubectl get nodes
+```bash
+sudo kubeadm join 192.168.22.84:6443 --token rzwwuk.kgog0monchz2hehc \
+        --discovery-token-ca-cert-hash sha256:a4f91b71b3e99ba275785c2545016b67bdaeb64d0f9a9026db62410dd605f438
+```
+
+`kubectl get nodes` in master
