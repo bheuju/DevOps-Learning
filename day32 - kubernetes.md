@@ -88,6 +88,15 @@ Use kubesphere if want to setup kubernetes easily without hassle.
 _Only for information_
 https://kubesphere.io/
 
+### Install containerd / dockerd ??
+
+```bash
+# cri-dockerd is required for docker and containerd to talk with each other
+sudo apt -y install docker.io
+wget https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.17/cri-dockerd_0.3.17.3-0.ubuntu-jammy_amd64.deb
+sudo apt-get install -y ./cri-dockerd_0.3.17.3-0.ubuntu-jammy_amd64.deb
+```
+
 ### Setup kubectl, kubeadm, kubelet
 
 ```bash
@@ -95,15 +104,9 @@ sudo apt update -y
 sudo apt-get install -y kubectl kubeadm kubelet
 ```
 
+---
+
 # Master
-
-### Install containerd / dockerd ??
-
-```bash
-sudo apt -y install docker.io
-wget https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.17/cri-dockerd_0.3.17.3-0.ubuntu-jammy_amd64.deb
-sudo apt-get install -y ./cri-dockerd_0.3.17.3-0.ubuntu-jammy_amd64.deb
-```
 
 ### Calico init
 
@@ -112,7 +115,7 @@ sudo kubeadm init --cri-socket=unix:///var/run/cri-dockerd.sock
 
 kubectl get pods -A
 -------------------------------
-kube-apiserver-kubeserver     # this should be up
+> kube-apiserver-kubeserver     # this should be up
 -------------------------------
 
 # from output of kubeadm init (run as a normal user)
@@ -154,12 +157,18 @@ Summary:
 - /etc/systemctl.conf
 - /etc/modules-load.d/k8s.conf
 - kubeadm, kubelet and kubectl installed
+- docker.io, cri-dockerd
 
 add join from kubeadm init of master
 
 ```bash
 sudo kubeadm join 192.168.22.84:6443 --token rzwwuk.kgog0monchz2hehc \
-        --discovery-token-ca-cert-hash sha256:a4f91b71b3e99ba275785c2545016b67bdaeb64d0f9a9026db62410dd605f438
+        --discovery-token-ca-cert-hash sha256:a4f91b71b3e99ba275785c2545016b67bdaeb64d0f9a9026db62410dd605f438 \
+        --cri-socket=unix:///var/run/cri-dockerd.sock
 ```
 
 `kubectl get nodes` in master
+
+---
+
+![alt-text](image.png)
