@@ -9,6 +9,11 @@ whoami
 sudo usermod -aG docker <username>
 
 # This allows the <username> user to run Docker commands without using sudo each time
+
+newgrp docker
+# you can refresh the group membership without logging out by running:
+
+
 sudo docker ps
 docker ps
 
