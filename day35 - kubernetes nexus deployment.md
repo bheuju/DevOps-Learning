@@ -240,3 +240,184 @@ If image is not getting pulled:
 3. try `docker login nexus.dev.me:8082/mynginx:v1.0.0`
 4. if success, then try `docker pull nexus.dev.me:8082/mynginx:v1.0.0`
 5. also check if `docker ps` works. i.e., `sudo usermod -aG docker <username>`
+
+### Done:
+
+[x] Pods
+[x] Service
+
+Next is deployment, replica sets
+
+## Deployment
+
+https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+
+```bash
+cd final
+kubectl delete -f pod.yaml
+
+
+nano deployment.yaml
+
+```
+
+`deployment.yaml`
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template: # replicas is based on template
+    metadata:
+      labels:
+        app: nginx
+        app.kubernetes.io/name: nginx # add this label
+    spec:
+      containers:
+        - name: nginx
+          image: nexus.dev.me:8082/mynginx:v1.0.0 # change image name
+          ports:
+            - containerPort: 80
+```
+
+node selector - label worker node. to select to which node to deploy
+
+Add service to this now
+
+`service.yaml`
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: nginx
+  ports:
+    - protocol: TCP
+      nodePort: 30007
+      port: 80
+      targetPort: 80
+```
+
+get all
+
+```bash
+kubectl apply -f pod.yaml
+kubectl apply -f deployment.yaml
+```
+
+---
+
+# For production we use either ingress-controller or load-balancer
+
+We also map domain to the IP
+
+## Ingress Controller
+
+https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/
+
+## Load Balancer
+
+Metal Load Balancer
+https://metallb.io/
+
+OpenLB
+
+```bash
+kubectl edit configmap -n kube-system kube-proxy
+
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml
+```
+
+`lb.yml`
+
+```yaml
+# lb.yml
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: first-pool
+  namespace: metallb-system
+spec:
+  addresses:
+    - 192.168.22.40-192.168.22.50
+```
+
+`ll.yml`
+
+```yaml
+# ll.yml
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: example
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - first-pool
+```
+
+```bash
+kubectl create -f lb.yml
+kubectl create -f ll.yml
+```
+
+```bash
+kubectl get all -n metallb-system
+```
+
+`deployment.yaml`
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+        app.kubernetes.io/name: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nexus.dev.me:8082/mynginx:v1.0.0
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: repository
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-svc
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 192.168.22.42
+
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: nginx
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+```
